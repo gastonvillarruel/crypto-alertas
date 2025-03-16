@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Criptomonedas - Binance</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/technicalindicators/3.1.0/technicalindicators.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Análisis de Criptomonedas - Binance</h1>
+        
+        <div id="api-form" class="form-container">
+            <h2>Configuración de API</h2>
+            <div class="input-group">
+                <label for="api-key">API Key:</label>
+                <input type="text" id="api-key" placeholder="Ingresa tu API Key de Binance">
+            </div>
+            <div class="input-group">
+                <label for="api-secret">API Secret:</label>
+                <input type="password" id="api-secret" placeholder="Ingresa tu API Secret de Binance">
+            </div>
+            <!-- Nuevo campo para el nombre de usuario o grupo de Telegram -->
+            <div class="input-group">
+                <label for="telegram-username">Nombre de Usuario o Grupo de Telegram:</label>
+                <input type="text" id="telegram-username" placeholder="Ingresa el nombre de usuario o grupo">
+            </div>
+            <button id="save-api">Guardar y Conectar</button>
+        </div>
+        
+        <div id="dashboard" class="hidden">
+            <div class="status-bar">
+                <div id="connection-status">Estado: <span class="status-text">Desconectado</span></div>
+                <div id="last-update">Última actualización: <span class="update-time">--:--:--</span></div>
+                <button id="refresh-btn">Actualizar Ahora</button>
+                <button id="change-api">Cambiar API</button>
+            </div>
+
+            <div class="data-container">
+                <h2>Pares con RSI > 70</h2>
+                <div class="table-container">
+                    <table id="data-table">
+                        <thead>
+                            <tr>
+                                <th>Par</th>
+                                <th>RSI</th>
+                                <th>EMA10</th>
+                                <th>Distancia a EMA10 (%)</th>
+                                <th>Divergencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="alerts-container">
+                <h2>Alertas de Divergencia</h2>
+                <div class="alerts-list" id="alerts-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification hidden">
+        <div class="notification-header">
+            <h3>¡Alerta de Divergencia!</h3>
+            <span class="close-notification">&times;</span>
+        </div>
+        <div class="notification-content" id="notification-content"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
