@@ -57,6 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // Funciones principales
 
 function normalizeText(text) {
+    // Si text es undefined, null o no es una cadena, devolver una cadena vacía
+    if (typeof text !== 'string' || !text) {
+        return '';
+    }
+
     // Eliminar emojis y otros caracteres no alfanuméricos
     const normalizedText = text.replace(/[^\w\s]/gi, '').toLowerCase();
     return normalizedText;
@@ -598,10 +603,16 @@ async function signedRequest(endpoint, params = {}) {
 }
 
 // Función para enviar mensajes por Telegram
-async function sendTelegramMessage(message, username) {
+async function sendTelegramMessage(message, username = localStorage.getItem('telegram_username')) {
     try {
-          // Normalizar el nombre de usuario o grupo
-          const normalizedUsername = normalizeText(username);
+        // Validar el nombre de usuario o grupo
+        if (!username) {
+            console.error('Nombre de usuario o grupo no definido.');
+            return;
+        }
+
+        // Normalizar el nombre de usuario o grupo
+        const normalizedUsername = normalizeText(username);
 
         // Obtener el chat_id del nombre de usuario o grupo
         const response = await fetch(`https://api.telegram.org/bot${telegramToken}/getUpdates`);
@@ -609,14 +620,16 @@ async function sendTelegramMessage(message, username) {
 
         if (data.ok && data.result.length > 0) {
             const chat = data.result.find(update => {
-            const chatInfo = update.message?.chat;
-            if (!chatInfo) return false;
-            // Normalizar el nombre del chat (usuario o grupo)
-            const chatName = chatInfo.username || chatInfo.title || '';
-            const normalizedChatName = normalizeText(chatName);
-            // Comparar los nombres normalizados
-            return normalizedChatName === normalizedUsername;
-        });
+                const chatInfo = update.message?.chat;
+                if (!chatInfo) return false;
+
+                // Normalizar el nombre del chat (usuario o grupo)
+                const chatName = chatInfo.username || chatInfo.title || '';
+                const normalizedChatName = normalizeText(chatName);
+
+                // Comparar los nombres normalizados
+                return normalizedChatName === normalizedUsername;
+            });
 
             if (chat) {
                 const chatId = chat.message.chat.id;
