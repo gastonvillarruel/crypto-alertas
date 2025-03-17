@@ -473,7 +473,7 @@ function updateTable() {
     }
     
     // Ordenar por RSI descendente
-    selectedPairs.sort((a, b) => b.rsi - a.rsi);
+    selectedPairs.sort((a, b) => b.distanceToEma10Percent - a.distanceToEma10Percent);
     
     // Actualizar la tabla
     selectedPairs.forEach(data => {
@@ -654,3 +654,34 @@ async function sendTelegramMessage(message, username = localStorage.getItem('tel
         console.error('Error al enviar mensaje por Telegram:', error);
     }
 }
+
+
+
+
+
+// Función para cambiar entre modo claro y oscuro
+function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+
+    // Guardar la preferencia del usuario en localStorage
+    const isDarkMode = body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+
+    // Cambiar el texto del botón
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.textContent = isDarkMode ? 'Modo Claro' : 'Modo Oscuro';
+}
+
+// Cargar la preferencia del usuario al iniciar
+document.addEventListener('DOMContentLoaded', () => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (savedDarkMode) {
+        document.body.classList.add('dark-mode');
+    }
+
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.textContent = savedDarkMode ? 'Modo Claro' : 'Modo Oscuro';
+
+    themeToggle.addEventListener('click', toggleDarkMode);
+});

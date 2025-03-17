@@ -1,3 +1,4 @@
+/* Estilos generales */
 * {
     margin: 0;
     padding: 0;
@@ -9,6 +10,12 @@ body {
     background-color: #f5f5f5;
     color: #333;
     line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
 }
 
 .container {
@@ -23,9 +30,17 @@ h1 {
     color: #2c3e50;
 }
 
+body.dark-mode h1 {
+    color: #e0e0e0;
+}
+
 h2 {
     color: #2c3e50;
     margin-bottom: 15px;
+}
+
+body.dark-mode h2 {
+    color: #e0e0e0;
 }
 
 .form-container {
@@ -35,6 +50,11 @@ h2 {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 500px;
     margin: 0 auto;
+}
+
+body.dark-mode .form-container {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
 }
 
 .input-group {
@@ -47,6 +67,10 @@ label {
     font-weight: bold;
 }
 
+body.dark-mode label {
+    color: #e0e0e0;
+}
+
 input[type="text"],
 input[type="password"] {
     width: 100%;
@@ -54,6 +78,15 @@ input[type="password"] {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
+    background-color: white;
+    color: #333;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="password"] {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
 }
 
 button {
@@ -68,6 +101,24 @@ button {
 }
 
 button:hover {
+    background-color: #2980b9;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.theme-toggle:hover {
     background-color: #2980b9;
 }
 
@@ -90,6 +141,11 @@ button:hover {
     margin-bottom: 20px;
 }
 
+body.dark-mode .status-bar {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
 .status-text {
     font-weight: bold;
     color: #e74c3c;
@@ -103,12 +159,22 @@ button:hover {
     font-weight: bold;
 }
 
+body.dark-mode .update-time {
+    color: #e0e0e0;
+}
+
 .data-container, .alerts-container {
     background-color: white;
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+}
+
+body.dark-mode .data-container,
+body.dark-mode .alerts-container {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
 }
 
 .table-container {
@@ -127,13 +193,27 @@ th, td {
     border-bottom: 1px solid #ddd;
 }
 
+body.dark-mode th,
+body.dark-mode td {
+    border-color: #555;
+    color: #e0e0e0;
+}
+
 th {
     background-color: #f2f2f2;
     font-weight: bold;
 }
 
+body.dark-mode th {
+    background-color: #333;
+}
+
 tr:hover {
     background-color: #f5f5f5;
+}
+
+body.dark-mode tr:hover {
+    background-color: #333;
 }
 
 .alerts-list {
@@ -149,6 +229,12 @@ tr:hover {
     border-radius: 4px;
 }
 
+body.dark-mode .alert-item {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
 .alert-item p {
     margin: 5px 0;
 }
@@ -158,8 +244,16 @@ tr:hover {
     color: #666;
 }
 
+body.dark-mode .alert-time {
+    color: #999;
+}
+
 .divergence-true {
     background-color: #ffecb3;
+}
+
+body.dark-mode .divergence-true {
+    background-color: #444;
 }
 
 .notification {
@@ -174,6 +268,11 @@ tr:hover {
     transition: all 0.3s ease;
     transform: translateY(100%);
     opacity: 0;
+}
+
+body.dark-mode .notification {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
 }
 
 .notification.show {
@@ -218,4 +317,8 @@ tr:hover {
     padding: 20px;
     font-style: italic;
     color: #7f8c8d;
+}
+
+body.dark-mode .loading {
+    color: #999;
 }
