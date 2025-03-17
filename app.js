@@ -32,11 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedApiKey = localStorage.getItem('binance_api_key');
     const savedApiSecret = localStorage.getItem('binance_api_secret');
     const savedTelegramUsername = localStorage.getItem('telegram_username'); // Recuperar el nombre de usuario o grupo
-    
-    if (savedApiKey && savedApiSecret && savedTelegramUsername) {
+    const savedInitiatorName = localStorage.getItem('initiator_name'); // Recuperar el nombre del iniciador
+
+    if (savedApiKey && savedApiSecret && savedTelegramUsername && savedInitiatorName) {
         apiKey = savedApiKey;
         apiSecret = savedApiSecret;
         document.getElementById('telegram-username').value = savedTelegramUsername; // Llenar el campo en el formulario
+        document.getElementById('initiator-name').value = savedInitiatorName; // Llenar el campo del nombre del iniciador
         apiForm.classList.add('hidden');
         dashboard.classList.remove('hidden');
         init();
@@ -71,9 +73,10 @@ async function saveApiCredentials() {
     const key = apiKeyInput.value.trim();
     const secret = apiSecretInput.value.trim();
     const telegramUsername = document.getElementById('telegram-username').value.trim(); // Obtener el nombre de usuario o grupo
+    const initiatorName = document.getElementById('initiator-name').value.trim(); // Capturar el nombre del iniciador
 
-    if (!key || !secret || !telegramUsername) {
-        alert('Por favor ingresa la API Key, el API Secret y el nombre de usuario o grupo de Telegram.');
+    if (!key || !secret || !telegramUsername || !initiatorName) {
+        alert('Por favor ingresa la API Key, el API Secret, el nombre de usuario o grupo de Telegram y tu nombre.');
         return;
     }
     
@@ -84,13 +87,14 @@ async function saveApiCredentials() {
         return;
     }
 
-    // Guardar credenciales
-    apiKey = key;
-    apiSecret = secret;
-    localStorage.setItem('binance_api_key', apiKey);
-    localStorage.setItem('binance_api_secret', apiSecret);
-    localStorage.setItem('telegram_username', telegramUsername); // Guardar el nombre de usuario o grupo
-    
+     // Guardar credenciales y nombre del iniciador
+     apiKey = key;
+     apiSecret = secret;
+     localStorage.setItem('binance_api_key', apiKey);
+     localStorage.setItem('binance_api_secret', apiSecret);
+     localStorage.setItem('telegram_username', telegramUsername);
+     localStorage.setItem('initiator_name', initiatorName); // Guardar el nombre del iniciador
+     
     // Cambiar a la vista del dashboard
     apiForm.classList.add('hidden');
     dashboard.classList.remove('hidden');
@@ -148,13 +152,25 @@ function init() {
             allPairs = pairs;
             connectionStatus.textContent = 'Conectado';
             connectionStatus.classList.add('connected');
+
+            // Actualizar contador de pares
+            document.querySelector('.total-pairs').textContent = allPairs.length;
             
             /// Obtener el nombre de usuario o grupo de Telegram guardado
             const telegramUsername = localStorage.getItem('telegram_username');
 
+            // Obtener el nombre del iniciador desde localStorage
+            const initiatorName = localStorage.getItem('initiator_name'); // Recuperar el nombre del iniciador
+
+            // Verificar si el nombre del iniciador está definido
+            if (!initiatorName) {
+                console.error('Nombre del iniciador no definido.');
+                return;
+            }
+            
             // Enviar mensaje de inicio por Telegram
             const totalPairs = allPairs.length;
-            const message = `La aplicación se ha iniciado correctamente. Se han analizado ${totalPairs} pares.`;
+            const message = `La aplicación se ha iniciado correctamente. Se han analizado ${totalPairs} pares.\nAplicación iniciada por: ${initiatorName}`;            
             sendTelegramMessage(message, telegramUsername);
 
             // Realizar la primera actualización
@@ -472,7 +488,10 @@ function updateTable() {
         return;
     }
     
-    // Ordenar por RSI descendente
+    // Actualizar contador de pares con RSI > 70
+    document.getElementById('rsi-counter').textContent = selectedPairs.length;
+
+    // Ordenar por distancia a ema10 descendente
     selectedPairs.sort((a, b) => b.distanceToEma10Percent - a.distanceToEma10Percent);
     
     // Actualizar la tabla

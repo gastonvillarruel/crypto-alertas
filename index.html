@@ -29,38 +29,47 @@
                 <label for="telegram-username">Nombre de Usuario o Grupo de Telegram:</label>
                 <input type="text" id="telegram-username" placeholder="Ingresa el nombre de usuario o grupo">
             </div>
+            <div class="input-group">
+                <label for="initiator-name">¿Quién está iniciando la aplicación?</label>
+                <input type="text" id="initiator-name" placeholder="Ingresa tu nombre">
+            </div>
             <button id="save-api">Guardar y Conectar</button>
         </div>
         
         <div id="dashboard" class="hidden">
             <div class="status-bar">
                 <div id="connection-status">Estado: <span class="status-text">Desconectado</span></div>
+                <div id="pairs-count">Pares analizados: <span class="total-pairs">0</span></div>
                 <div id="last-update">Última actualización: <span class="update-time">--:--:--</span></div>
                 <button id="refresh-btn">Actualizar Ahora</button>
                 <button id="change-api">Cambiar API</button>
             </div>
-
-            <div class="data-container">
-                <h2>Pares con RSI > 70</h2>
-                <div class="table-container">
-                    <table id="data-table">
-                        <thead>
-                            <tr>
-                                <th>Par</th>
-                                <th>RSI</th>
-                                <th>EMA10</th>
-                                <th>Distancia a EMA10 (%)</th>
-                                <th>Divergencia</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-body"></tbody>
-                    </table>
+            
+            <div class="dashboard-content">
+                <div class="main-content">
+                    <div class="data-container">
+                        <h2>Pares con RSI > 70 (<span id="rsi-counter">0</span>)</h2>
+                        <div class="table-container">
+                            <table id="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Par</th>
+                                        <th>RSI</th>
+                                        <th>EMA10</th>
+                                        <th>Distancia a EMA10 (%)</th>
+                                        <th>Divergencia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="data-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="alerts-container">
-                <h2>Alertas de Divergencia</h2>
-                <div class="alerts-list" id="alerts-list"></div>
+        
+                <div class="alerts-container">
+                    <h2>Alertas de Divergencia</h2>
+                    <div class="alerts-list" id="alerts-list"></div>
+                </div>
             </div>
         </div>
     </div>
