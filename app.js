@@ -6,9 +6,8 @@ let allPairs = [];
 let selectedPairs = [];
 let lastData = {};
 let recentAlerts = {}; // Registro de alertas recientes
-let lastUpdateId = 0; // para procesar mensajes entrantes
 
-const telegramToken = '7876073170:AAF08SOSv15JqDMaGbYNF1zkoz0EMRTXSQ8'; // Reemplaza con tu token de Telegram
+const telegramToken = '7876073170:AAF0pOvc5bwSjE4ZQx5PNQVx_4SiAFAnUyU'; // Reemplaza con tu token de Telegram
 
 
 // Elementos DOM
@@ -100,9 +99,6 @@ async function saveApiCredentials() {
     apiForm.classList.add('hidden');
     dashboard.classList.remove('hidden');
     
-    // Iniciar la comprobación de mensajes inmediatamente
-    checkTelegramMessages();
-    
     // Inicializar
     init();
 }
@@ -183,8 +179,8 @@ function init() {
             // Configurar actualización periódica (cada minuto)
             updateInterval = setInterval(refreshData, 60000);
 
-            // Añadir esta línea: comprobar mensajes de Telegram cada 10 segundos
-            setInterval(checkTelegramMessages, 10000);
+            // Configurar el envío de mensajes cada hora
+            setInterval(sendHourlyTelegramMessage, 60 * 60 * 1000); // 60 minutos * 60 segundos * 1000 milisegundos
         })
         .catch(error => {
             console.error('Error al conectar con Binance:', error);
@@ -192,6 +188,7 @@ function init() {
             alert('Error al conectar con Binance. Verifica tus credenciales API.');
         });
 }
+
 
 async function fetchAllPairs() {
     try {
@@ -628,55 +625,6 @@ async function signedRequest(endpoint, params = {}) {
     return response.json();
 }
 
-// Función para comprobar mensajes nuevos
-async function checkTelegramMessages() {
-    try {
-        const response = await fetch(`https://api.telegram.org/bot${telegramToken}/getUpdates?offset=${lastUpdateId + 1}`);
-        const data = await response.json();
-        
-        if (data.ok && data.result.length > 0) {
-            // Actualizar el último ID de actualización procesado
-            lastUpdateId = Math.max(...data.result.map(update => update.update_id));
-            
-            // Procesar cada mensaje
-            data.result.forEach(update => {
-                if (update.message && update.message.text) {
-                    const chatId = update.message.chat.id;
-                    const text = update.message.text.toLowerCase();
-                    
-                    // Responder al comando
-                    if (text === '/dondeestas' || text === '/estás' || text === '/estas' || text === '/ping') {
-                        sendTelegramResponse(chatId, "Tranqui, nada que alertar por ahora...");
-                    }
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error al comprobar mensajes de Telegram:', error);
-    }
-}
-
-// Función para enviar respuestas directamente a un chat_id específico
-async function sendTelegramResponse(chatId, message) {
-    try {
-        const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-        const payload = {
-            chat_id: chatId,
-            text: message
-        };
-
-        await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-    } catch (error) {
-        console.error('Error al enviar respuesta por Telegram:', error);
-    }
-}
-
 // Función para enviar mensajes por Telegram
 async function sendTelegramMessage(message, username = localStorage.getItem('telegram_username')) {
     try {
@@ -728,6 +676,12 @@ async function sendTelegramMessage(message, username = localStorage.getItem('tel
     } catch (error) {
         console.error('Error al enviar mensaje por Telegram:', error);
     }
+}
+
+function sendHourlyTelegramMessage() {
+    const telegramUsername = localStorage.getItem('telegram_username');
+    const message = "Analizando el mercado cripto en busca de oportunidades";
+    sendTelegramMessage(message, telegramUsername);
 }
 
 
