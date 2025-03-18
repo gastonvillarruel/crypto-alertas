@@ -576,7 +576,8 @@ function createAlert(data) {
     }
 
     // Enviar notificación por Telegram
-    const telegramMessage = `¡Alerta de Divergencia!\nPar: ${data.pair}\nRSI: ${data.rsi.toFixed(2)}\nDistancia a EMA10: ${data.distanceToEma10Percent.toFixed(2)}%\nHora: ${timeString}`;
+    const tradingViewLink = `https://www.tradingview.com/chart/?symbol=BINANCE:${data.pair}.P`;
+    const telegramMessage = `¡Alerta de Divergencia!\nPar: [${data.pair}](${tradingViewLink})\nRSI: ${data.rsi.toFixed(2)}\nDistancia a EMA10: ${data.distanceToEma10Percent.toFixed(2)}%`;
     sendTelegramMessage(telegramMessage);
 }
 
@@ -659,7 +660,9 @@ async function sendTelegramMessage(message, username = localStorage.getItem('tel
                 const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
                 const payload = {
                     chat_id: chatId,
-                    text: message
+                    text: message,
+                    parse_mode: 'Markdown', // Usar Markdown para formatear el mensaje
+                    disable_web_page_preview: true // Desactivar la vista previa del enlace
                 };
 
                 await fetch(url, {
