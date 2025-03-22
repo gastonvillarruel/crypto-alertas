@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     changeApiBtn.addEventListener('click', showApiForm);
     refreshBtn.addEventListener('click', () => {
         console.log("Actualización forzada")
-        firstTime = true; // Cambiar la variable firstTime a true
         refreshData();    // Ejecutar refreshData
         scheduleNextUpdate();
     });
@@ -182,7 +181,6 @@ function init() {
             checkRecentlyListedPairs();
             
             // Programar la próxima actualización
-            firstTime = true;
             scheduleNextUpdate();
             
             // Configurar el envío de mensajes cada hora
@@ -241,12 +239,7 @@ async function checkRecentlyListedPairs() {
 
 // Actualizar datos
 
-let firstTime = true;
-
 async function refreshData() {
-    if (!firstTime) {
-        scheduleNextUpdate();
-    }
     try {
         console.log("refreshData() ejecutado") // Para depuración
 
@@ -299,24 +292,27 @@ function scheduleNextUpdate() {
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
+    const milliseconds = now.getMilliseconds();
 
-    // Calcular cuántos segundos faltan para el próximo cierre de vela (múltiplo de 5 minutos)
+
+    // Calcular cuántos milisegundos faltan para el próximo múltiplo de 5 minutos
     const minutesToNextCandle = 5 - (minutes % 5);
-    const secondsToNextCandle = (minutesToNextCandle * 60) - seconds - 5; // 5 segundos antes del cierre
+    const secondsToNextCandle = (minutesToNextCandle * 60) - seconds;
+    const millisecondsToNextCandle = (secondsToNextCandle * 1000) - milliseconds;
+
+     // Ajustar para ejecutar 5 segundos antes del cierre de la vela
+     const adjustedMillisecondsToNextCandle = millisecondsToNextCandle - 5000;
     
-    // Programar la actualización justo antes del cierre de la vela
-    if (firstTime) {
-        console.log(`[${now.toLocaleTimeString()}] Próxima actualización en ${secondsToNextCandle} segundos (${new Date(now.getTime() + secondsToNextCandle * 1000).toLocaleTimeString()})`);
-        updateTimeout = setTimeout(() => {
-            firstTime = false;
-            refreshData();
-        }, secondsToNextCandle * 1000);
-    } else {
-        console.log(`[${now.toLocaleTimeString()}] Próxima actualización en 5 minutos`);
-        setTimeout(() => {
-            refreshData();
-        }, 5 * 60 * 1000 - 4); // -4 porque es lo que tarda en actualizar
-    }
+    // Si el tiempo ajustado es negativo, significa que ya pasó el momento de ejecución, 
+    // por lo que se programa para el próximo ciclo de 5 minutos
+    const delay = adjustedMillisecondsToNextCandle > 0 ? adjustedMillisecondsToNextCandle : (5 * 60 * 1000) + adjustedMillisecondsToNextCandle;
+
+    console.log(`[${now.toLocaleTimeString()}] Próxima actualización en ${delay / 1000} segundos (${new Date(now.getTime() + delay).toLocaleTimeString()})`);
+
+    updateTimeout = setTimeout(() => {
+        refreshData();
+        scheduleNextUpdate(); // Programar la próxima ejecución
+    }, delay);
 }
 
 async function fetchKlines(symbol, interval, limit) {
