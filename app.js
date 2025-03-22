@@ -570,9 +570,9 @@ function updateTable() {
 }
 
 function checkForAlerts() {
-    // Comprobar si algún par tiene divergencia y distancia a EMA10 > 1%
+    // Comprobar si algún par tiene divergencia y distancia a EMA10 > 1.2%
     const alertPairs = selectedPairs.filter(data => 
-        data.hasDivergence && data.distanceToEma10Percent > 1
+        data.hasDivergence && data.distanceToEma10Percent > 1.2
     );
     
     alertPairs.forEach(data => {
