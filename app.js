@@ -1,7 +1,7 @@
 // Variables globales
 let apiKey = '';
 let apiSecret = '';
-let updateInterval;
+let updateTimeout;
 let allPairs = [];
 let selectedPairs = [];
 let lastData = {};
@@ -104,7 +104,7 @@ async function saveApiCredentials() {
 }
 
 function showApiForm() {
-    clearInterval(updateInterval);
+    clearInterval(updateTimeout);
     dashboard.classList.add('hidden');
     apiForm.classList.remove('hidden');
     apiKeyInput.value = apiKey;
@@ -175,10 +175,10 @@ function init() {
 
             // Realizar la primera actualización
             refreshData();
-            
-            // Configurar actualización periódica (cada minuto)
-            updateInterval = setInterval(refreshData, 60000);
 
+            // Programar la próxima actualización 
+            scheduleNextUpdate();
+            
             // Configurar el envío de mensajes cada hora
             setInterval(sendHourlyTelegramMessage, 60 * 60 * 1000); // 60 minutos * 60 segundos * 1000 milisegundos
         })
@@ -204,9 +204,12 @@ async function fetchAllPairs() {
         throw error;
     }
 }
+let firstTime = null;
 
 async function refreshData() {
     try {
+        console.log("refreshData() ejecutado") // Para depuración
+
         dataBody.innerHTML = '<tr><td colspan="5" class="loading">Cargando datos...</td></tr>';
         
         // Actualizar la hora
@@ -216,37 +219,18 @@ async function refreshData() {
         // Procesar todos los pares
         const results = await Promise.all(allPairs.map(async (pair) => {
             try {
-                // Obtener los datos de las velas
                 const klines = await fetchKlines(pair, '5m', 100);
-                
-                // Calcular indicadores
                 const { closes, rsi, ema10, distanceToEma10Percent, hasDivergence } = calculateIndicators(klines);
                 
-                // Guardar los datos
-                lastData[pair] = {
-                    closes,
-                    rsi: rsi[rsi.length - 1],
-                    ema10: ema10[ema10.length - 1],
-                    distanceToEma10Percent,
-                    hasDivergence
-                };
+                if (rsi[rsi.length - 1] <= 70) return null; // Ignorar si el RSI es menor a 70
                 
-                // Devolver los resultados solo si el RSI es mayor que 70
-                if (rsi[rsi.length - 1] > 70) {
-                    return {
-                        pair,
-                        rsi: rsi[rsi.length - 1],
-                        ema10: ema10[ema10.length - 1],
-                        distanceToEma10Percent,
-                        hasDivergence
-                    };
-                }
-                return null;
+                return { pair, rsi: rsi[rsi.length - 1], ema10: ema10[ema10.length - 1], distanceToEma10Percent, hasDivergence };
             } catch (error) {
                 console.error(`Error procesando ${pair}:`, error);
                 return null;
             }
         }));
+        
         
         // Filtrar resultados válidos (RSI > 70)
         selectedPairs = results.filter(result => result !== null);
@@ -256,10 +240,48 @@ async function refreshData() {
         
         // Comprobar alertas
         checkForAlerts();
+        
     } catch (error) {
         console.error('Error al actualizar datos:', error);
         connectionStatus.textContent = 'Error de actualización';
         connectionStatus.classList.remove('connected');
+    } finally {
+        if (firstTime != null) {
+            scheduleNextUpdate();
+        }
+    }
+}
+
+
+// Función para calcular el momento exacto en que debe ejecutarse refreshData() (5 segundos antes del cambio de vela)
+
+function scheduleNextUpdate() {
+    if (updateTimeout) {
+        clearTimeout(updateTimeout); // Cancelar cualquier timeout anterior
+    }
+    
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    // Calcular cuántos segundos faltan para el próximo cierre de vela (múltiplo de 5 minutos)
+    const minutesToNextCandle = 5 - (minutes % 5);
+    const secondsToNextCandle = (minutesToNextCandle * 60) - seconds - 5; // 5 segundos antes del cierre
+
+    // acá para simplificar podría poner que si secondsToNextCandle es un valor negativo, es porque todavía se encuentra en la misma vela y tiene que sumarse a la vela siguiente (o algo así)
+    
+    // Programar la actualización justo antes del cierre de la vela
+    if (firstTime == null) {
+        console.log(`[${now.toLocaleTimeString()}] Próxima actualización en ${secondsToNextCandle} segundos (${new Date(now.getTime() + secondsToNextCandle * 1000).toLocaleTimeString()})`);
+        updateTimeout = setTimeout(() => {
+            firstTime = 1;
+            refreshData();
+        }, secondsToNextCandle * 1000);
+    } else {
+        console.log(`[${now.toLocaleTimeString()}] Próxima actualización en 5 minutos`);
+        setTimeout(() => {
+            refreshData();
+        }, 5 * 60 * 1000 - 4); // -4 porque es lo que tarda en actualizar
     }
 }
 
@@ -420,8 +442,8 @@ function checkForDivergence(klines, rsi, ema10) {
     // Calcular el rango de precio en porcentaje hasta la EMA10
     const distanceToEma10Percent = ((currentClose - currentEma10) / currentEma10) * 100;
     
-    // Si la distancia a EMA10 no es mayor a 1%, no hay divergencia
-    if (distanceToEma10Percent <= 1) {
+    // Si la distancia a EMA10 no es mayor a 1.2%, no hay divergencia
+    if (distanceToEma10Percent <= 1.2) {
         return false;
     }
     
