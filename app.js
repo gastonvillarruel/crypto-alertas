@@ -7,7 +7,7 @@ let selectedPairs = [];
 let lastData = {};
 let recentAlerts = {}; // Registro de alertas recientes
 
-const telegramToken = '7876073170:AAF0pOvc5bwSjE4ZQx5PNQVx_4SiAFAnUyU'; // Reemplaza con tu token de Telegram
+const telegramToken = ''; // Reemplaza con tu token de Telegram
 
 
 // Elementos DOM
